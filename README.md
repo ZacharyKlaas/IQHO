@@ -1,4 +1,10 @@
 IQHO
 ====
 
-IQHO
+These files were used in the creation of IQHO maps (Indice de qualité de l'habitat de l'orignal) at my consulting geographic information systems position at JLC Géomatique in Gatineau, QC, Canada from August-November 2013.  The IQHO maps provide information on moose habitat, which is used primarily by hunters in locating moose within their assigned zones during Quebec's moose hunting season.  The files contained in this repository are:
+
+* IQHO9.py - A map labeling script which improved the speed with which I could create labels for these IQHO maps.  The script takes the information entered by the user and creates the proper arrangements for the text in the labels, which is then sequentially listed for the user, who can use CTRL-C and CTRL-V to copy the information from the results window and paste it into the map text element windows.  This script will run without installation of ArcGIS.  It was created for use with ArcGIS version 9 and earlier, which do not allow the functionality of the ArcGIS ArcPy package in Python.
+
+* IQHO10.py - The same labeling script as the previous script, except that ArcPy is used to send the labeling information directly into a map document for an IQHO map, rather than cutting and pasting manually into the map.  This functionality involves the ArcGIS ArcPy package in Python.  Because it involves ArcPy, it is written for ArcGIS 10 and after.  This script's "Envoyer" method cannot be run without ArcGIS being installed or the ArcPy package being present on the system.
+
+* modelrun.py - This script automatically runs the nine ArcGIS ModelBuilder models, created by Michel Breton and Benoît Bray, which generate the IQHO index statistic used to identify moose habitat in Quebec.  It also requires ArcGIS to be installed, and the ArcPy package in Python to be present.  Also, this script provides access to the specific IQHO ModelBuilder models designed by JLC Géomatique.  For this reason, the script will not run without these models being present on the system.  Thus, this script is provided merely as a general demonstration of how to access ModelBuilder models using ArcPy.
