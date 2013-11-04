@@ -1,7 +1,7 @@
 IQHO
 ====
 
-These files were used in the creation of IQHO maps (Indice de qualité de l'habitat de l'orignal) at my consulting geographic information systems position at JLC Géomatique in Gatineau, QC, Canada from August-November 2013.  The IQHO maps provide information on moose habitat, which is used primarily by hunters in locating moose within their assigned zones during Quebec's moose hunting season.  The files contained in this repository are:
+These files were used in the creation of IQHO maps (Indice de qualité de l'habitat de l'orignal) at my consulting geographic information systems position at JLC Géomatique in Gatineau, QC, Canada from August-November 2013.  The IQHO maps provide information on moose habitat, which is used primarily by hunters in locating moose within their assigned zones during Quebec's moose hunting season.  The data which create these files are the property of Marc-Alain Poupart; for more information, please consult http://www.macarte.ca and click on the selection "IQHO".  The files contained in this repository are:
 
 * IQHO9.py - A map labeling script which improved the speed with which I could create labels for these IQHO maps.  The script takes the information entered by the user and creates the proper arrangements for the text in the labels, which is then sequentially listed for the user, who can use CTRL-C and CTRL-V to copy the information from the results window and paste it into the map text element windows.  This script will run without installation of ArcGIS.  It was created for use with ArcGIS version 9 and earlier, which do not allow the functionality of the ArcGIS ArcPy package in Python.
 
