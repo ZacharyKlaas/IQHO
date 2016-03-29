@@ -5,7 +5,8 @@ print "Importing packages..."
 #  included in ArcGIS, but can be downloaded free on the internet.  The numpy
 #  package is included in more recent distributions of Python, and contains the
 #  numeric array processing functions necessary to speed up calculations for
-#  large arrays.
+#  large arrays.  The scipy package contains scientific functions that are used
+#  to power the functions provided by pysal.
 
 print "Importing functions..."
 from pysal.esda.mapclassify import Natural_Breaks as nb
