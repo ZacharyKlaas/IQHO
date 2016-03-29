@@ -1,4 +1,4 @@
-import arcpy, pysal, numpy
+import arcpy, pysal, numpy, scipy
 print "Importing packages..."
 #The arcpy package, of course, is the Python package for ArcGIS functions.  The
 #  pysal package is an open-source package of geography functions that is not
