@@ -1,4 +1,4 @@
-import arcpy, pysal, numpy, scipy
+import arcpy, pysal, numpy, scipy, pandas
 print "Importing packages..."
 #The arcpy package, of course, is the Python package for ArcGIS functions.  The
 #  pysal package is an open-source package of geography functions that is not
@@ -6,7 +6,8 @@ print "Importing packages..."
 #  package is included in more recent distributions of Python, and contains the
 #  numeric array processing functions necessary to speed up calculations for
 #  large arrays.  The scipy package contains scientific functions that are used
-#  to power the functions provided by pysal.
+#  to power the functions provided by pysal.  The pandas packag contains data
+#  analysis functions used to power the functions provided by pysal.
 
 print "Importing functions..."
 from pysal.esda.mapclassify import Natural_Breaks as nb
