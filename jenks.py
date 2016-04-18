@@ -1,4 +1,9 @@
-import arcpy, pysal, numpy, scipy, pandas
+import scipy, pandas, pysal
+import arcpy
+import numpy as np
+import pandas as pd
+from numpy import array
+from pandas import DataFrame
 print "Importing packages..."
 #The arcpy package, of course, is the Python package for ArcGIS functions.  The
 #  pysal package is an open-source package of geography functions that is not
@@ -6,19 +11,22 @@ print "Importing packages..."
 #  package is included in more recent distributions of Python, and contains the
 #  numeric array processing functions necessary to speed up calculations for
 #  large arrays.  The scipy package contains scientific functions that are used
-#  to power the functions provided by pysal.  The pandas packag contains data
+#  to power the functions provided by pysal.  The pandas package contains data
 #  analysis functions used to power the functions provided by pysal.
+#The numpy and pandas packages are instantiated because we will be using elements
+#  of the array and DataFrame functions within those packages.
 
 print "Importing functions..."
 from pysal.esda.mapclassify import Natural_Breaks as nb
 #The Jenks Natural Breaks function is contained in the pysal package under the
 #  name pysal.esda.mapclassify.Natural_Breaks.  For simplicity's sake we will
-#  rename this formula as nb for later use in the code.
+#  instantiate this as nb for later use in the code.
 
 print "Converting IQHO to Numpy Array..."
-fc = "IQH_Temp_join3.shp"
-field = "IQHO"
+fc = "f:\\test\\IQH_Temp_join3.shp"
+field = "IQH_Test"
 myArray = arcpy.da.FeatureClassToNumPyArray(fc, field, skip_nulls=True)
+myArray.dtype = np.float32
 #The preceding calculation relies upon the arcpy.da (Data Analysis) and numpy packages.
 #The fc parameter is the feature class upon which the operation is to be performed.
 #The field parameter is the name of the field which is to be categorised into the
@@ -29,6 +37,9 @@ myArray = arcpy.da.FeatureClassToNumPyArray(fc, field, skip_nulls=True)
 #  values are distinct from values of zero, which generally one will want to retain
 #  in calculations.  Null values typically represent "no data" for an area, and as
 #  such, should be excluded from consideration by Jenks Natural Breaks calculations.
+#Though the array is of integers, it is cast as a float because the PYSAL package
+#  element KMEANS requires a float variable.  The results returning from PYSAL
+#  are fed into integer fields, however.
 
 print "Calculating breaks..."
 breaks = nb(myArray.ravel(),k=4,initial=20)
@@ -60,10 +71,17 @@ except Exception as e:
 #  block of code.
 
 print "Exporting results to feature class table..."
-arcpy.AddField_management(fc, newfield, "SHORT")
-arcpy.da.NumPyArrayToFeatureClass(breaks,fc,newfield)
+arcpy.AddField_management(fc,"index","long")
+arcpy.AddField_management(fc,newfield,"long")
+myData = pd.DataFrame(breaks.yb)
+myData.columns = [newfield]
+myReturnArray = myData.to_records()
+arcpy.da.ExtendTable(fc, "FID", myReturnArray, "index", False)
+arcpy.DeleteField_management(fc, "index")
+#An index field is temporarily added, as the to_records() function appends the entire
+#  array to the table, and the array we have produced contains an index field and
+#  the new field with the natural breaks data.
 #The new field, called "Jenks", is added to the table in the specified fc parameter
-#  from before as a short integer (as the field will contain numbers representing Jenks
-#  categories, and as such will always be integers and will be small enough that the
-#  long format for integers will likely not be required.
+#  from before as a long integer (as the field will contain numbers representing Jenks
+#  categories, and as such will always be integers.
 #The breaks array calculated before is then transferred into this new "Jenks" field.
