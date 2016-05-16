@@ -49,55 +49,63 @@ for row in cursor:
 	else:
 		myArray[thecount] = row[0]
 		thecount += 1
-myDataFrame = pd.DataFrame({"TheData": myArray})
-#La fonction "GetParameterAsText" invite l'utilisateur de nommer le fichier géographique
-#  ("feature class" ou "fc") sur lequel les opérations vont commencer.
-#Ce script utilise "IQH_FINAL" comme le champ des données sur lequel les opérations vont
-#   commencer ("field").
-#La calculation utilise les progiciels arcpy.da (analyse des données) et numpy.
-#Nonobstant que le tableau numérique consiste en nombres entiers, le tableau est
-#   transformé au format de point flottant ("float") parce que le progiciel PySAL
-#   a besoin de cette transformation pour l'intégrer avec la fonction KMEANS.
-#L'iteration "for-if-else" trie les valeurs "null" des vraies données, et après cette
-#   sortation, les données sont transferées en format de cadre des données pandas.
-
-print "Calcul des Jenks natural breaks..."
-breaks = nb(myDataFrame["TheData"].dropna().values,k=4,initial=20)
-#Le calcul des valeurs Jenks est produit par le progiciel pysal.  Tous les valeurs
-#   "null" sont sortis, et les données qui restent sont préparées pour l'analyse.
-#La paramètre k symbolise le nombre des classes la fonction Jenks va créer pour
-#   l'utilisateur.
-#La paramètre initial est le semence de la fonction Jenks.  Un valeur grand va
-#   converger la fonction plus vite; un valeur petit, d'autre part, va être plus exact. 
-
-print "Vérification s'il y avait calculs précédents des champs de valeurs Jenks..."
 try:
-	arcpy.DeleteField_management(fc, "Jenks")
-	print "Calculs précédents des champs de valeurs Jenks effacés..."
+	myDataFrame = pd.DataFrame({"TheData": myArray})
+	#La fonction "GetParameterAsText" invite l'utilisateur de nommer le fichier géographique
+	#  ("feature class" ou "fc") sur lequel les opérations vont commencer.
+	#Ce script utilise "IQH_FINAL" comme le champ des données sur lequel les opérations vont
+	#   commencer ("field").
+	#La calculation utilise les progiciels arcpy.da (analyse des données) et numpy.
+	#Nonobstant que le tableau numérique consiste en nombres entiers, le tableau est
+	#   transformé au format de point flottant ("float") parce que le progiciel PySAL
+	#   a besoin de cette transformation pour l'intégrer avec la fonction KMEANS.
+	#L'iteration "for-if-else" trie les valeurs "null" des vraies données, et après cette
+	#   sortation, les données sont transferées en format de cadre des données pandas.
 
+	print "Calcul des Jenks natural breaks..."
+	breaks = nb(myDataFrame["TheData"].dropna().values,k=4,initial=20)
+	#Le calcul des valeurs Jenks est produit par le progiciel pysal.  Tous les valeurs
+	#   "null" sont sortis, et les données qui restent sont préparées pour l'analyse.
+	#La paramètre k symbolise le nombre des classes la fonction Jenks va créer pour
+	#   l'utilisateur.
+	#La paramètre initial est le semence de la fonction Jenks.  Un valeur grand va
+	#   converger la fonction plus vite; un valeur petit, d'autre part, va être plus exact. 
+
+	print "Vérification s'il y avait calculs précédents des champs de valeurs Jenks..."
+	try:
+		arcpy.DeleteField_management(fc, "Jenks")
+		print "Calculs précédents des champs de valeurs Jenks effacés..."
+
+	except Exception as e:
+		print "Aucuns champs des valeurs Jenks trouvés..."
+	#Cette iteration "try-except" efface les calculs précédents s'ils existent. Si un champ
+	#   des résultats "Jenks" existe, le partie "try" va l'effacer.  Si un tel champ n'existe
+	#   pas, le partie "except" annonce que c'est le cas.
+
+	print "Exportation des resultats au fichier géographique (shapefile)..."
+	arcpy.AddField_management(fc,"index","long")
+	arcpy.AddField_management(fc,"Jenks","long")
+	myData = pd.DataFrame({"Jenks": breaks.yb}, index=myDataFrame["TheData"].dropna().index)
+	joinData = myDataFrame.join(myData)
+	joinData["Jenks"].fillna(0, inplace=True)
+	joinData.drop("TheData",1,inplace=True)
+	myReturnArray = joinData.to_records()
+	arcpy.da.ExtendTable(fc, "FID", myReturnArray, "index", False)
+	arcpy.DeleteField_management(fc, "index")
+	arcpy.DeleteField_management(fc,"TheData")
+	#Un champ intitulé "index" est temporairement ajouté au tableau du fichier géographique,
+	#   et aussi un champ plus permanent intitulé "Jenks", en utilisant les fonctions arcpy.
+	#Un cadre de données pandas est créé, et les resultats de l'analyse sont dirigés version
+	#   le cadre.  Tous les valeurs "null" qu'on a trouvé avant sont donc identifiés comme
+	#   parti du premier catégorie (le catégorie 0, parce que les catégories rangent entre
+	#   0-3).
+	#En utilisant la fonction to_records() de pandas, les données sont inscrites dans un
+	#   tableau, est les valeurs de ce tableau sont après transferés dans les champs "index"
+	#   et "Jenks".
+	
 except Exception as e:
-	print "Aucuns champs des valeurs Jenks trouvés..."
-#Cette iteration "try-except" efface les calculs précédents s'ils existent. Si un champ
-#   des résultats "Jenks" existe, le partie "try" va l'effacer.  Si un tel champ n'existe
-#   pas, le partie "except" annonce que c'est le cas.
-
-print "Exportation des resultats au fichier géographique (shapefile)..."
-arcpy.AddField_management(fc,"index","long")
-arcpy.AddField_management(fc,"Jenks","long")
-myData = pd.DataFrame({"Jenks": breaks.yb}, index=myDataFrame["TheData"].dropna().index)
-joinData = myDataFrame.join(myData)
-joinData["Jenks"].fillna(0, inplace=True)
-joinData.drop("TheData",1,inplace=True)
-myReturnArray = joinData.to_records()
-arcpy.da.ExtendTable(fc, "FID", myReturnArray, "index", False)
-arcpy.DeleteField_management(fc, "index")
-arcpy.DeleteField_management(fc,"TheData")
-#Un champ intitulé "index" est temporairement ajouté au tableau du fichier géographique,
-#   et aussi un champ plus permanent intitulé "Jenks", en utilisant les fonctions arcpy.
-#Un cadre de données pandas est créé, et les resultats de l'analyse sont dirigés version
-#   le cadre.  Tous les valeurs "null" qu'on a trouvé avant sont donc identifiés comme
-#   parti du premier catégorie (le catégorie 0, parce que les catégories rangent entre
-#   0-3).
-#En utilisant la fonction to_records() de pandas, les données sont inscrites dans un
-#   tableau, est les valeurs de ce tableau sont après transferés dans les champs "index"
-#   et "Jenks".
+	print "Les données ne sont pas suffisantes pour catégorisation par l'analyse Jenks."
+	print "Le fichier n'est pas être produit."
+	#Le code est dans un loop "try-except" parce qu'il faut assurer qu'il sera un
+	#   nombre des données suffisant pour génerer un analyse Jenks.  Si ce n'est pas
+	#   possible, le code va completer sans erreur en tout cas.
